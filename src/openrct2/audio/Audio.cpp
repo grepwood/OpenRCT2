@@ -23,6 +23,7 @@
 #include "../peep/Peep.h"
 #include "../ride/Ride.h"
 #include "../ui/UiContext.h"
+#include "../util/Endian.h"
 #include "../util/Util.h"
 #include "AudioContext.h"
 #include "AudioMixer.h"
@@ -342,7 +343,7 @@ void audio_init_ride_sounds_and_info()
             try
             {
                 auto fs = FileStream(path, FILE_MODE_OPEN);
-                uint32_t head = fs.ReadValue<uint32_t>();
+                uint32_t head = ORCT_ensure_value_is_little_endian32(fs.ReadValue<uint32_t>());
                 if (head == 0x78787878)
                 {
                     rideMusicInfo.length = 0;

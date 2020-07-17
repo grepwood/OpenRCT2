@@ -10,6 +10,7 @@
 #include "SawyerEncoding.h"
 
 #include "../core/IStream.hpp"
+#include "../util/Endian.h"
 #include "RCT12.h"
 
 #include <algorithm>
@@ -45,7 +46,7 @@ namespace SawyerEncoding
             } while (dataSize != 0);
 
             // Read file checksum
-            uint32_t fileChecksum = stream->ReadValue<uint32_t>();
+            uint32_t fileChecksum = ORCT_ensure_value_is_little_endian32(stream->ReadValue<uint32_t>());
 
             // Rewind back to original position
             stream->SetPosition(initialPosition);

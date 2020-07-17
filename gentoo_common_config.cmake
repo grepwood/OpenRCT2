@@ -1,0 +1,8 @@
+SET (CMAKE_GENTOO_BUILD ON CACHE BOOL "Indicate Gentoo package build")
+SET (LIB_SUFFIX 64 CACHE STRING "library path suffix" FORCE)
+SET (CMAKE_INSTALL_LIBDIR lib64 CACHE PATH "Output directory for libraries")
+SET (CMAKE_INSTALL_INFODIR "/usr/share/info" CACHE PATH "")
+SET (CMAKE_INSTALL_MANDIR "/usr/share/man" CACHE PATH "")
+SET (CMAKE_USER_MAKE_RULES_OVERRIDE "/home/mdec/git/OpenRCT2/gentoo_rules.cmake" CACHE FILEPATH "Gentoo override rules")
+SET (CMAKE_INSTALL_DOCDIR "/usr/share/doc/openrct2-0.2.4" CACHE PATH "")
+SET (BUILD_SHARED_LIBS ON CACHE BOOL "")

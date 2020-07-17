@@ -23,6 +23,7 @@
 #include "../ride/RideGroupManager.h"
 #include "../ride/ShopItem.h"
 #include "../ride/Track.h"
+#include "../util/Endian.h"
 #include "ObjectJsonHelpers.h"
 #include "ObjectRepository.h"
 
@@ -35,7 +36,7 @@ using namespace OpenRCT2;
 void RideObject::ReadLegacy(IReadObjectContext* context, IStream* stream)
 {
     stream->Seek(8, STREAM_SEEK_CURRENT);
-    _legacyType.flags = stream->ReadValue<uint32_t>();
+    _legacyType.flags = ORCT_ensure_value_is_little_endian32(stream->ReadValue<uint32_t>());
     for (auto& rideType : _legacyType.ride_type)
     {
         rideType = stream->ReadValue<uint8_t>();
@@ -111,7 +112,7 @@ void RideObject::ReadLegacy(IReadObjectContext* context, IStream* stream)
         uint16_t numPeepLoadingPositions = stream->ReadValue<uint8_t>();
         if (numPeepLoadingPositions == 255)
         {
-            numPeepLoadingPositions = stream->ReadValue<uint16_t>();
+            numPeepLoadingPositions = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
         }
 
         if (_legacyType.vehicles[i].flags & VEHICLE_ENTRY_FLAG_LOADING_WAYPOINTS)
@@ -133,7 +134,7 @@ void RideObject::ReadLegacy(IReadObjectContext* context, IStream* stream)
                 entry[1].y = stream->ReadValue<int8_t>();
                 entry[2].x = stream->ReadValue<int8_t>();
                 entry[2].y = stream->ReadValue<int8_t>();
-                stream->ReadValue<uint16_t>(); // Skip blanks
+                stream->ReadValue<uint16_t>(); // Skip blanks, no need to swap endianess
 
                 _peepLoadingWaypoints[i].push_back(entry);
             }
@@ -405,19 +406,19 @@ void RideObject::SetRepositoryItem(ObjectRepositoryItem* item) const
 void RideObject::ReadLegacyVehicle(
     [[maybe_unused]] IReadObjectContext* context, IStream* stream, rct_ride_entry_vehicle* vehicle)
 {
-    vehicle->rotation_frame_mask = stream->ReadValue<uint16_t>();
+    vehicle->rotation_frame_mask = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
     stream->Seek(2 * 1, STREAM_SEEK_CURRENT);
-    vehicle->spacing = stream->ReadValue<uint32_t>();
-    vehicle->car_mass = stream->ReadValue<uint16_t>();
+    vehicle->spacing = ORCT_ensure_value_is_little_endian32(stream->ReadValue<uint32_t>());
+    vehicle->car_mass = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
     vehicle->tab_height = stream->ReadValue<int8_t>();
     vehicle->num_seats = stream->ReadValue<uint8_t>();
-    vehicle->sprite_flags = stream->ReadValue<uint16_t>();
+    vehicle->sprite_flags = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
     vehicle->sprite_width = stream->ReadValue<uint8_t>();
     vehicle->sprite_height_negative = stream->ReadValue<uint8_t>();
     vehicle->sprite_height_positive = stream->ReadValue<uint8_t>();
     vehicle->animation = stream->ReadValue<uint8_t>();
-    vehicle->flags = stream->ReadValue<uint32_t>();
-    vehicle->base_num_frames = stream->ReadValue<uint16_t>();
+    vehicle->flags = ORCT_ensure_value_is_little_endian32(stream->ReadValue<uint32_t>());
+    vehicle->base_num_frames = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
     stream->Seek(15 * 4, STREAM_SEEK_CURRENT);
     vehicle->no_seating_rows = stream->ReadValue<uint8_t>();
     vehicle->spinning_inertia = stream->ReadValue<uint8_t>();

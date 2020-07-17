@@ -11,6 +11,7 @@
 
 #include "../OpenRCT2.h"
 #include "../core/IStream.hpp"
+#include "../util/Endian.h"
 #include "Object.h"
 
 #include <algorithm>
@@ -37,8 +38,8 @@ void ImageTable::Read(IReadObjectContext* context, IStream* stream)
 
     try
     {
-        uint32_t numImages = stream->ReadValue<uint32_t>();
-        uint32_t imageDataSize = stream->ReadValue<uint32_t>();
+        uint32_t numImages = ORCT_ensure_value_is_little_endian32(stream->ReadValue<uint32_t>());
+        uint32_t imageDataSize = ORCT_ensure_value_is_little_endian32(stream->ReadValue<uint32_t>());
 
         uint64_t headerTableSize = numImages * 16;
         uint64_t remainingBytes = stream->GetLength() - stream->GetPosition() - headerTableSize;
@@ -63,15 +64,15 @@ void ImageTable::Read(IReadObjectContext* context, IStream* stream)
         {
             rct_g1_element g1Element;
 
-            uintptr_t imageDataOffset = static_cast<uintptr_t>(stream->ReadValue<uint32_t>());
+            uintptr_t imageDataOffset = ORCT_ensure_value_is_little_endian32(static_cast<uintptr_t>(stream->ReadValue<uint32_t>()));
             g1Element.offset = reinterpret_cast<uint8_t*>(imageDataBase + imageDataOffset);
 
-            g1Element.width = stream->ReadValue<int16_t>();
-            g1Element.height = stream->ReadValue<int16_t>();
-            g1Element.x_offset = stream->ReadValue<int16_t>();
-            g1Element.y_offset = stream->ReadValue<int16_t>();
-            g1Element.flags = stream->ReadValue<uint16_t>();
-            g1Element.zoomed_offset = stream->ReadValue<uint16_t>();
+            g1Element.width = ORCT_ensure_value_is_little_endian16(stream->ReadValue<int16_t>());
+            g1Element.height = ORCT_ensure_value_is_little_endian16(stream->ReadValue<int16_t>());
+            g1Element.x_offset = ORCT_ensure_value_is_little_endian16(stream->ReadValue<int16_t>());
+            g1Element.y_offset = ORCT_ensure_value_is_little_endian16(stream->ReadValue<int16_t>());
+            g1Element.flags = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
+            g1Element.zoomed_offset = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
 
             newEntries.push_back(g1Element);
         }

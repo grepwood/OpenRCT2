@@ -10,6 +10,7 @@
 #pragma once
 
 #include "../common.h"
+#include "../util/Endian.h"
 #include "Console.hpp"
 #include "File.h"
 #include "FileScanner.h"
@@ -265,6 +266,14 @@ private:
 
                 // Read header, check if we need to re-scan
                 auto header = fs.ReadValue<FileIndexHeader>();
+                header.HeaderSize = ORCT_ensure_value_is_little_endian32(header.HeaderSize);
+                header.MagicNumber = ORCT_ensure_value_is_little_endian32(header.MagicNumber);
+                header.LanguageId = ORCT_ensure_value_is_little_endian16(header.LanguageId);
+                header.NumItems = ORCT_ensure_value_is_little_endian32(header.NumItems);
+                header.Stats.TotalFiles = ORCT_ensure_value_is_little_endian32(header.Stats.TotalFiles);
+                header.Stats.TotalFileSize = ORCT_ensure_value_is_little_endian64(header.Stats.TotalFileSize);
+                header.Stats.FileDateModifiedChecksum = ORCT_ensure_value_is_little_endian32(header.Stats.FileDateModifiedChecksum);
+                header.Stats.PathChecksum = ORCT_ensure_value_is_little_endian32(header.Stats.PathChecksum);
                 if (header.HeaderSize == sizeof(FileIndexHeader) && header.MagicNumber == _magicNumber
                     && header.VersionA == FILE_INDEX_VERSION && header.VersionB == _version && header.LanguageId == language
                     && header.Stats.TotalFiles == stats.TotalFiles && header.Stats.TotalFileSize == stats.TotalFileSize

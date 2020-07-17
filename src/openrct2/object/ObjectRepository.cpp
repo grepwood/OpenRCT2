@@ -29,6 +29,7 @@
 #include "../rct12/SawyerChunkReader.h"
 #include "../rct12/SawyerChunkWriter.h"
 #include "../scenario/ScenarioRepository.h"
+#include "../util/Endian.h"
 #include "../util/SawyerCoding.h"
 #include "../util/Util.h"
 #include "Object.h"
@@ -164,6 +165,7 @@ protected:
         ObjectRepositoryItem item;
 
         item.ObjectEntry = stream->ReadValue<rct_object_entry>();
+        item.ObjectEntry.flags = ORCT_ensure_value_is_little_endian32(item.ObjectEntry.flags);
         item.Path = stream->ReadStdString();
         item.Name = stream->ReadStdString();
         auto sourceLength = stream->ReadValue<uint8_t>();
@@ -189,11 +191,12 @@ protected:
                 break;
             case OBJECT_TYPE_SCENERY_GROUP:
             {
-                auto numEntries = stream->ReadValue<uint16_t>();
+                auto numEntries = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
                 item.SceneryGroupInfo.Entries = std::vector<rct_object_entry>(numEntries);
                 for (size_t i = 0; i < numEntries; i++)
                 {
                     item.SceneryGroupInfo.Entries[i] = stream->ReadValue<rct_object_entry>();
+                    item.SceneryGroupInfo.Entries[i].flags = ORCT_ensure_value_is_little_endian32(item.SceneryGroupInfo.Entries[i].flags);
                 }
                 break;
             }
@@ -359,6 +362,7 @@ public:
 
         // Check if we already have this object
         rct_object_entry entry = stream->ReadValue<rct_object_entry>();
+        entry.flags = ORCT_ensure_value_is_little_endian32(entry.flags);
         if (FindObject(&entry) != nullptr)
         {
             chunkReader.SkipChunk();
@@ -624,6 +628,7 @@ private:
         // Read object data from file
         auto fs = FileStream(item->Path, FILE_MODE_OPEN);
         auto fileEntry = fs.ReadValue<rct_object_entry>();
+        fileEntry.flags = ORCT_ensure_value_is_little_endian32(fileEntry.flags);
         if (!object_entry_compare(entry, &fileEntry))
         {
             throw std::runtime_error("Header found in object file does not match object to pack.");

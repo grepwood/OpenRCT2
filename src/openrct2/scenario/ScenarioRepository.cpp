@@ -25,6 +25,7 @@
 #include "../localisation/LocalisationService.h"
 #include "../platform/Platform2.h"
 #include "../rct12/SawyerChunkReader.h"
+#include "../util/Endian.h"
 #include "Scenario.h"
 #include "ScenarioSources.h"
 
@@ -182,17 +183,17 @@ protected:
         scenario_index_entry item;
 
         stream->Read(item.path, sizeof(item.path));
-        item.timestamp = stream->ReadValue<uint64_t>();
+        item.timestamp = ORCT_ensure_value_is_little_endian64(stream->ReadValue<uint64_t>());
 
         item.category = stream->ReadValue<uint8_t>();
         item.source_game = stream->ReadValue<uint8_t>();
-        item.source_index = stream->ReadValue<int16_t>();
-        item.sc_id = stream->ReadValue<uint16_t>();
+        item.source_index = ORCT_ensure_value_is_little_endian16(stream->ReadValue<int16_t>());
+        item.sc_id = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
 
         item.objective_type = stream->ReadValue<uint8_t>();
         item.objective_arg_1 = stream->ReadValue<uint8_t>();
-        item.objective_arg_2 = stream->ReadValue<int32_t>();
-        item.objective_arg_3 = stream->ReadValue<int16_t>();
+        item.objective_arg_2 = ORCT_ensure_value_is_little_endian32(stream->ReadValue<int32_t>());
+        item.objective_arg_3 = ORCT_ensure_value_is_little_endian16(stream->ReadValue<int16_t>());
         item.highscore = nullptr;
 
         stream->Read(item.internal_name, sizeof(item.internal_name));
@@ -587,7 +588,7 @@ private:
         try
         {
             auto fs = FileStream(path, FILE_MODE_OPEN);
-            uint32_t fileVersion = fs.ReadValue<uint32_t>();
+            uint32_t fileVersion = ORCT_ensure_value_is_little_endian32(fs.ReadValue<uint32_t>());
             if (fileVersion != 1)
             {
                 Console::Error::WriteLine("Invalid or incompatible highscores file.");
@@ -596,14 +597,14 @@ private:
 
             ClearHighscores();
 
-            uint32_t numHighscores = fs.ReadValue<uint32_t>();
+            uint32_t numHighscores = ORCT_ensure_value_is_little_endian32(fs.ReadValue<uint32_t>());
             for (uint32_t i = 0; i < numHighscores; i++)
             {
                 scenario_highscore_entry* highscore = InsertHighscore();
                 highscore->fileName = fs.ReadString();
                 highscore->name = fs.ReadString();
-                highscore->company_value = fs.ReadValue<money32>();
-                highscore->timestamp = fs.ReadValue<datetime64>();
+                highscore->company_value = ORCT_ensure_value_is_little_endian32(fs.ReadValue<money32>());
+                highscore->timestamp = ORCT_ensure_value_is_little_endian64(fs.ReadValue<datetime64>());
             }
         }
         catch (const std::exception&)
@@ -647,6 +648,10 @@ private:
             {
                 // Read legacy entry
                 auto scBasic = fs.ReadValue<rct_scores_entry>();
+                scBasic.objectiveArg2 = ORCT_ensure_value_is_little_endian32(scBasic.objectiveArg2);
+                scBasic.objectiveArg3 = ORCT_ensure_value_is_little_endian16(scBasic.objectiveArg3);
+                scBasic.Flags = ORCT_ensure_value_is_little_endian32(scBasic.Flags);
+                scBasic.CompanyValue = ORCT_ensure_value_is_little_endian32(scBasic.CompanyValue);
 
                 // Ignore non-completed scenarios
                 if (scBasic.Flags & SCENARIO_FLAGS_COMPLETED)

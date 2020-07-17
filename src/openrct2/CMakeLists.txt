@@ -167,6 +167,7 @@ if (NOT MINGW AND NOT MSVC)
     find_package(ICU 59.0 REQUIRED COMPONENTS uc)
         
     target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${ICU_INCLUDE_DIRS})
+    target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${SDL2_INCLUDE_DIRS})
         
     if (STATIC)
         target_link_libraries(${PROJECT_NAME} ${ICU_STATIC_LIBRARIES})

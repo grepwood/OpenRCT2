@@ -21,6 +21,7 @@
 #include <openrct2/core/String.hpp>
 #include <openrct2/localisation/Localisation.h>
 #include <openrct2/world/Location.hpp>
+#include <openrct2/util/Endian.h>
 
 using namespace OpenRCT2;
 using namespace OpenRCT2::Input;
@@ -102,14 +103,14 @@ bool KeyboardShortcuts::Load()
         if (File::Exists(path))
         {
             auto fs = FileStream(path, FILE_MODE_OPEN);
-            uint16_t version = fs.ReadValue<uint16_t>();
+            uint16_t version = ORCT_ensure_value_is_little_endian16(fs.ReadValue<uint16_t>());
             if (version == KeyboardShortcuts::CURRENT_FILE_VERSION)
             {
                 int32_t numShortcutsInFile = (fs.GetLength() - sizeof(uint16_t)) / sizeof(uint16_t);
                 int32_t numShortcutsToRead = std::min<int32_t>(SHORTCUT_COUNT, numShortcutsInFile);
                 for (int32_t i = 0; i < numShortcutsToRead; i++)
                 {
-                    _keys[i] = fs.ReadValue<uint16_t>();
+                    _keys[i] = ORCT_ensure_value_is_little_endian16(fs.ReadValue<uint16_t>());
                 }
                 result = true;
             }

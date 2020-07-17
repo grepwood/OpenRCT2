@@ -15,6 +15,7 @@
 #include "../core/IStream.hpp"
 #include "../localisation/Language.h"
 #include "../localisation/StringIds.h"
+#include "../util/Endian.h"
 #include "../world/Location.hpp"
 #include "ObjectJsonHelpers.h"
 
@@ -23,7 +24,7 @@
 void WaterObject::ReadLegacy(IReadObjectContext* context, IStream* stream)
 {
     stream->Seek(14, STREAM_SEEK_CURRENT);
-    _legacyType.flags = stream->ReadValue<uint16_t>();
+    _legacyType.flags = ORCT_ensure_value_is_little_endian16(stream->ReadValue<uint16_t>());
 
     GetStringTable().Read(context, stream, OBJ_STRING_ID_NAME);
     GetImageTable().Read(context, stream);

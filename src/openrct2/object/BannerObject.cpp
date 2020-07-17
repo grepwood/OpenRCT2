@@ -14,6 +14,7 @@
 #include "../localisation/Language.h"
 #include "../object/Object.h"
 #include "../object/ObjectRepository.h"
+#include "../util/Endian.h"
 #include "ObjectJsonHelpers.h"
 #include "ObjectList.h"
 
@@ -22,6 +23,7 @@ void BannerObject::ReadLegacy(IReadObjectContext* context, IStream* stream)
     stream->Seek(6, STREAM_SEEK_CURRENT);
     _legacyType.banner.scrolling_mode = stream->ReadValue<uint8_t>();
     _legacyType.banner.flags = stream->ReadValue<uint8_t>();
+    _legacyType.banner.price = ORCT_ensure_value_is_little_endian16(stream->ReadValue<int16_t>());
     _legacyType.banner.price = stream->ReadValue<int16_t>();
     _legacyType.banner.scenery_tab_id = OBJECT_ENTRY_INDEX_NULL;
     stream->Seek(2, STREAM_SEEK_CURRENT);
@@ -29,6 +31,7 @@ void BannerObject::ReadLegacy(IReadObjectContext* context, IStream* stream)
     GetStringTable().Read(context, stream, OBJ_STRING_ID_NAME);
 
     rct_object_entry sgEntry = stream->ReadValue<rct_object_entry>();
+    sgEntry.flags = ORCT_ensure_value_is_little_endian32(sgEntry.flags);
     SetPrimarySceneryGroup(&sgEntry);
 
     GetImageTable().Read(context, stream);
